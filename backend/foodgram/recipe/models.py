@@ -5,6 +5,9 @@ from django.db import models
 from users.models import User
 
 
+INGREDIENT_MIN_VALUE = 1
+
+
 class Ingredient(models.Model):
     name = models.CharField(
         verbose_name='Ингредиент',
@@ -53,11 +56,14 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='recipe',
     )
     name = models.CharField(
         verbose_name='Название рецепта',
         max_length=200
+    )
+    text = models.TextField(
+        verbose_name='Описание'
     )
     pub_date = models.DateField(
         verbose_name='Дата публикации',
@@ -65,7 +71,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Картинка',
-        upload_to='recipes/',
+        upload_to='recipe/',
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -75,7 +81,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='recipes'
+        related_name='recipe'
     )
     cooking_time = models.PositiveIntegerField('Время проготовления')
     description = models.TextField(null=True)
@@ -152,11 +158,11 @@ class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='amounts',
+        related_name='amount',
         verbose_name='Ингредиент',
     )
     quantity = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1),)
+        validators=(MinValueValidator(INGREDIENT_MIN_VALUE),)
     )
 
     class Meta:

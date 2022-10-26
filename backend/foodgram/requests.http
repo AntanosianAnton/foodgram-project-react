@@ -1,3 +1,118 @@
-GET http://127.0.0.1:8000/api/users/subscriptions/
-Content-Type: application/json
-Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+USERS ✅
+  ###
+  GET http://127.0.0.1:8000/api/users/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  POST http://127.0.0.1:8000/api/users/
+  Content-Type: application/json
+
+  {
+    "email": "test@user10.com",
+    "username": "testuser10",
+    "first_name": "test_name",
+    "last_name": "test_surname",
+    "password": "Zz12345678"
+  }
+  ###
+  GET http://127.0.0.1:8000/api/users/5/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  GET http://127.0.0.1:8000/api/users/me/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  POST http://127.0.0.1:8000/api/users/set_password/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+
+  {
+    "new_password": "Zz1234567890",
+    "current_password": "Zz12345678"
+  }
+  ###
+  POST http://127.0.0.1:8000/api/auth/token/login/
+  Content-Type: application/json
+
+  {
+    "password": "Zz12345678",
+    "email": "test@user2.com"
+  }
+  ###
+  POST http://127.0.0.1:8000/api/auth/token/logout/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+
+TAGS ✅
+  ###
+  GET http://127.0.0.1:8000/api/tags/
+  ###
+  GET http://127.0.0.1:8000/api/tags/3/
+
+RECIPES ❌
+  ###
+  GET http://127.0.0.1:8000/api/recipes/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  POST http://127.0.0.1:8000/api/recipes/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  GET http://127.0.0.1:8000/api/recipes/3/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  PATCH http://127.0.0.1:8000/api/recipes/3/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  DELETE http://127.0.0.1:8000/api/recipes/3/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+
+CART ❌
+  ###
+  GET http://127.0.0.1:8000/api/recipes/download_shopping_cart/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  POST http://127.0.0.1:8000/api/recipes/download_shopping_cart/2/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  DELETE http://127.0.0.1:8000/api/recipes/download_shopping_cart/2/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+
+FAVORITE ❌
+  ###
+  POST http://127.0.0.1:8000/api/recipes/3/favorite/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  DELETE http://127.0.0.1:8000/api/recipes/3/favorite/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+
+SUBSCRIPTIONS ✅
+  ###
+  GET http://127.0.0.1:8000/api/users/subscriptions/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  POST http://127.0.0.1:8000/api/users/6/subscribe/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+  ###
+  DELETE http://127.0.0.1:8000/api/users/6/subscribe/
+  Content-Type: application/json
+  Authorization: Token 9cc58151e852f4e99915b022a48895b2b4e80676
+
+IDGREDIENTS ✅
+  ###
+  GET http://127.0.0.1:8000/api/ingredients/?name=Ингредиент_1
+  ###
+  GET http://127.0.0.1:8000/api/ingredients/3/
+  ###
