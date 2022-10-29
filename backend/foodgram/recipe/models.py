@@ -4,7 +4,6 @@ from django.db import models
 
 from users.models import User
 
-
 INGREDIENT_MIN_VALUE = 1
 
 

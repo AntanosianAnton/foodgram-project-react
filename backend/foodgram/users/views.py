@@ -1,15 +1,17 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.http import HttpResponse
-from djoser.views import UserViewSet
+from rest_framework.response import Response
+
+from recipe.models import Subscribe
 
 from .models import User
-from recipe.models import Subscribe
 from .serializers import FollowSerializer, UserSignupSerializer
 
 
@@ -17,6 +19,7 @@ class UsersViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSignupSerializer
     permission_classes = (AllowAny, )
+    pagination_class = PageNumberPagination
 
     @action(
         detail=True,

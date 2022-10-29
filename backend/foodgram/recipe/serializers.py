@@ -1,10 +1,11 @@
 import base64
+
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from django.core.files.base import ContentFile
 
-from recipe.models import (Recipe, ShoppingCart, Tag, Ingredient,
-                           Favorite, IngredientAmount)
+from recipe.models import (Favorite, Ingredient, IngredientAmount, Recipe,
+                           ShoppingCart, Tag)
 from users.models import User
 from users.serializers import UserSignupSerializer
 
@@ -61,7 +62,7 @@ class RecipeReprpesentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IngredientAmount
-        fields = '__all__'
+        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -219,7 +220,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request = self.context.get('request')
         context = {'request': request}
-        return RecipeReprpesentSerializer(instance, context=context).data
+        return PurchaseListSerializer(instance, context=context).data
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):

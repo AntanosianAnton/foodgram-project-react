@@ -1,9 +1,11 @@
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
+
+from recipe.models import Recipe, Subscribe
+from users.models import User
+
 # from django.contrib.auth.hashers import make_password
 
-from users.models import User
-from recipe.models import Subscribe, Recipe
 
 
 class UserSignupSerializer(UserCreateSerializer):

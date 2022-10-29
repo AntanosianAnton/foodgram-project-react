@@ -1,18 +1,21 @@
-from rest_framework import viewsets, status
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import (AllowAny,
-                                        IsAuthenticatedOrReadOnly,
-                                        IsAuthenticated)
-from rest_framework.response import Response
-from rest_framework.decorators import action
+import datetime
 
-from recipe.models import (Recipe, Tag, Ingredient, Favorite,
-                           ShoppingCart)
-from recipe.serializers import (CheckRecipeSerializer, RecipeSerializer,
-                                ShoppingCartSerializer,
-                                TagSerializer, IngredientSerializer,
-                                FavoriteSerializer,)
+from django.shortcuts import HttpResponse, get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+
+from recipe.models import (Favorite, Ingredient, IngredientAmount, Recipe,
+                           ShoppingCart, Tag)
+from recipe.serializers import (CheckRecipeSerializer, FavoriteSerializer,
+                                IngredientSerializer, RecipeSerializer,
+                                ShoppingCartSerializer, TagSerializer)
+
+from .filters import IngredientSearchFilter, RecipeFilter
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -27,15 +30,16 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     pagination_class = None
     serializer_class = IngredientSerializer
+    filter_backends = (IngredientSearchFilter,)
     search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    # filter_class =
+    filter_class = (RecipeFilter,)
     filter_backends = (DjangoFilterBackend,)
-    # pagination_class =
+    pagination_class = PageNumberPagination
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -87,3 +91,35 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.delete_method(request=request,
                                       pk=pk,
                                       model=ShoppingCart)
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=(IsAuthenticated,)
+    )
+    def download_purchase_list(self, request):
+        purchase_list = {}
+        ingredients = IngredientAmount.objects.filter(
+            recipe__purch__user=request.user).values_list(
+                'ingredient__name', 'ingredient__measurement_unit',
+                'quantity', 'recipe__name'
+        )
+        for ingredient in ingredients:
+            name = ingredient.ingredient.name
+            amount = ingredient.amount
+            measurment_unit = ingredient.ingredient.measurment_unit
+            if name not in purchase_list:
+                purchase_list[name] = {
+                    'measurment_unit': measurment_unit,
+                    'amount': amount
+                }
+            else:
+                purchase_list[name]['amount'] += amount
+        main_list = ([f"* {item}:{value['amount']}"
+                      f"{value['measurement_unit']}\n"
+                      for item, value in purchase_list.items()])
+        today = datetime.date.today()
+        main_list.append(f'\n From FoodGram with love, {today.year}')
+        response = HttpResponse(main_list, 'Content-Type: text/plain')
+        response['Content-Disposition'] = 'attachment; filename="BuyList.txt"'
+        return response
