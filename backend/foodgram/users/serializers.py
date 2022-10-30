@@ -4,9 +4,6 @@ from rest_framework import serializers
 from recipe.models import Recipe, Subscribe
 from users.models import User
 
-# from django.contrib.auth.hashers import make_password
-
-
 
 class UserSignupSerializer(UserCreateSerializer):
     """Сериалайзер для регистрации пользователя"""
@@ -15,7 +12,6 @@ class UserSignupSerializer(UserCreateSerializer):
         model = User
         fields = ('email', 'username', 'id',
                   'first_name', 'last_name', 'password',)
-        # extra_kwargs = {'password': {'write_only': True}}
 
 
 class RecipeRepresentSerializer(serializers.ModelSerializer):

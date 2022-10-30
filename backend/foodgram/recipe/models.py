@@ -19,6 +19,11 @@ class Ingredient(models.Model):
     )
 
     class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='pair_unique'),
+        )
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
@@ -144,7 +149,7 @@ class Subscribe(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user} {self.following}'
+        return f'{self.user.username} {self.following}'
 
 
 class IngredientAmount(models.Model):
