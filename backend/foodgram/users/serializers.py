@@ -23,7 +23,9 @@ class RecipeRepresentSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    is_subscribed = serializers.SerializerMethodField(
+        read_only=True,
+        method_name='get_is_subscribed')
 
     class Meta:
         model = User

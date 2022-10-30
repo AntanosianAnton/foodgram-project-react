@@ -22,14 +22,14 @@ class Ingredient(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('name', 'measurement_unit'),
-                name='pair_unique'),
+                name='unique ingredient'),
         )
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return self.name
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
@@ -53,7 +53,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
 
 
 class Recipe(models.Model):
@@ -96,7 +96,7 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
 
 
 class ShoppingCart(models.Model):
@@ -116,12 +116,12 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Корзина'
         constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
+            models.UniqueConstraint(fields=('user', 'recipe'),
                                     name='shopping cart')
         ]
 
     def __str__(self):
-        return f'{self.recipe.name} {self.user.username}'
+        return f'{self.recipe.name}, {self.user.username}'
 
 
 class Subscribe(models.Model):
@@ -144,12 +144,12 @@ class Subscribe(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
-            models.UniqueConstraint(fields=['user', 'following'],
+            models.UniqueConstraint(fields=('user', 'following'),
                                     name='subscribe')
         ]
 
     def __str__(self):
-        return f'{self.user.username} {self.following}'
+        return f'{self.user.username}, {self.following.username}'
 
 
 class IngredientAmount(models.Model):
@@ -178,7 +178,7 @@ class IngredientAmount(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.ingredient} {self.recipe}'
+        return f'{self.ingredient}, {self.recipe}'
 
 
 class Favorite(models.Model):
@@ -199,7 +199,7 @@ class Favorite(models.Model):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
         constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
+            models.UniqueConstraint(fields=('user', 'recipe'),
                                     name='unique favorite')
         ]
 

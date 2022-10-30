@@ -22,28 +22,28 @@ class User(AbstractUser):
             message='Допустимые символы: буквы, цифры, +, @, ., -,_')],
         verbose_name='Уникальное имя',
         help_text='Введите имя пользователя',
-        )
+    )
     email = models.EmailField(
         db_index=True,
         unique=True,
         max_length=254,
         verbose_name='Электронная почта',
         help_text='Введите адрес электронной почты',
-        )
+    )
     first_name = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         verbose_name='Имя',
         help_text='Введите имя пользователя',
-        )
+    )
     last_name = models.CharField(
         max_length=150,
         blank=True,
         null=True,
         verbose_name='Фамилия',
         help_text='Введите фамилию пользователя',
-        )
+    )
     password = models.CharField(
         verbose_name='Пароль',
         max_length=150,
@@ -60,7 +60,7 @@ class User(AbstractUser):
         default=False,
         verbose_name='Подписка на данного пользователя',
         help_text='Подписаться',
-        )
+    )
 
     def __str__(self):
         return self.username
