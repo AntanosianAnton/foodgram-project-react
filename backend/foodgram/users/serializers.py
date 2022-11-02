@@ -26,12 +26,19 @@ class FollowSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(
         read_only=True,
         method_name='get_is_subscribed')
+    recipe = serializers.SerializerMethodField(
+        method_name='get_recipe'
+    )
+    recipes_count = serializers.SerializerMethodField(
+        method_name='get_recipes_count'
+    )
 
     class Meta:
         model = User
         fields = ('email', 'username', 'id',
                   'first_name', 'last_name',
-                  'is_subscribed',)
+                  'is_subscribed', 'recipes',
+                  'recipes_count',)
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user

@@ -4,8 +4,8 @@ from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
+from foodgram.pagination import CustomPagination
+from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
@@ -14,20 +14,20 @@ from recipe.models import (Favorite, Ingredient, IngredientAmount, Recipe,
 from recipe.serializers import (CheckRecipeSerializer, FavoriteSerializer,
                                 IngredientSerializer, RecipeSerializer,
                                 ShoppingCartSerializer, TagSerializer)
-
+from .permissions import IsAuthorOrAdmin
 from .filters import IngredientSearchFilter, RecipeFilter
 
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     serializer_class = IngredientSerializer
     filter_backends = (IngredientSearchFilter,)
@@ -36,10 +36,10 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorOrAdmin,)
     filter_class = (RecipeFilter,)
     filter_backends = (DjangoFilterBackend,)
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
