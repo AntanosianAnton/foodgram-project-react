@@ -37,7 +37,7 @@ class FollowSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'username', 'id',
                   'first_name', 'last_name',
-                  'is_subscribed', 'recipes',
+                  'is_subscribed', 'recipe',
                   'recipes_count',)
 
     def get_is_subscribed(self, obj):
@@ -50,13 +50,13 @@ class FollowSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         limit_recipes = request.query_params.get('recipes_limit')
         if limit_recipes is not None:
-            queryset = obj.recipes.all()[:(int(limit_recipes))]
+            queryset = obj.recipe.all()[:(int(limit_recipes))]
         else:
-            queryset = obj.recipes.all()
+            queryset = obj.recipe.all()
         context = {'request': request}
         return RecipeRepresentSerializer(queryset, many=True,
                                          context=context).data
 
     @staticmethod
     def get_recipes_count(obj):
-        return obj.recipes.count()
+        return obj.recipe.count()
