@@ -39,8 +39,10 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 
 class PurchaseListSerializer(serializers.ModelSerializer):
     """
-    Сериалайзер добавленя рецепта в список покупок
+    Сериалайзер добавления рецепта в список покупок
     """
+    image = Base64ImageField()
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -216,10 +218,22 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
 
     class Meta:
         model = ShoppingCart
         fields = ('user', 'recipe')
+
+    def validate(self, data):
+        user = data['user']
+        recipe_id = data['recipe'].id
+        if ShoppingCart.objects.filter(user=user,
+                                       recipe__id=recipe_id).exists():
+            raise ValidationError(
+                'Рецепт уже добавлен в корзину!'
+            )
+        return data
 
     def to_representation(self, instance):
         request = self.context.get('request')

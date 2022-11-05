@@ -5,29 +5,30 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from foodgram.pagination import CustomPagination
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (IsAuthenticated)
+                                        # IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-
+from rest_framework.exceptions import ValidationError
 from recipe.models import (Favorite, Ingredient, IngredientAmount, Recipe,
                            ShoppingCart, Tag)
 from recipe.serializers import (CheckRecipeSerializer, FavoriteSerializer,
                                 IngredientSerializer, RecipeSerializer,
-                                ShoppingCartSerializer, TagSerializer)
-from .permissions import IsAuthorOrAdmin
+                                TagSerializer, PurchaseListSerializer)
+from .permissions import IsAuthorOrAdmin, IsAdminOrReadOnly
 from .filters import IngredientSearchFilter, RecipeFilter
 
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    # permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    # permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     serializer_class = IngredientSerializer
     filter_backends = (IngredientSearchFilter,)
@@ -37,6 +38,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrAdmin,)
+    # permission_classes = (IsAuthenticated,)
     default_serializer_class = RecipeSerializer
     filter_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
@@ -47,51 +49,78 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return CheckRecipeSerializer
         return RecipeSerializer
 
-    @staticmethod
-    def post_method(request, pk, serializers):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = serializers(data=data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializers.save()
+    def _favorite_shopping_post_delete(self, related_manager):
+        recipe = self.get_object()
+        if self.request.method == 'DELETE':
+            related_manager.get(recipe_id=recipe.id).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if related_manager.filter(recipe=recipe).exists():
+            raise ValidationError('Рецепт уже в избранном')
+        related_manager.create(recipe=recipe)
+        serializer = PurchaseListSerializer(instance=recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @staticmethod
-    def delete_method(request, pk, model):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        model_obj = get_object_or_404(model, user=user, recipe=recipe)
-        model_obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    @action(detail=True,
+            permission_classes=[IsAuthenticated],
+            methods=['POST', 'DELETE'], )
+    def favorite(self, request, pk=None):
+        return self._favorite_shopping_post_delete(
+            request.user.favorites_user
+        )
 
-    @action(
-        detail=True,
-        methods=['post', 'delete'],
-        permission_classes=(IsAuthenticated)
-    )
-    def favorite(self, request, pk):
-        if self.request.method == 'POST':
-            return self.post_method(request=request,
-                                    pk=pk,
-                                    serializers=FavoriteSerializer)
-        if self.request.method == 'DELETE':
-            return self.delete_method(request=request,
-                                      pk=pk,
-                                      model=Favorite)
+    @action(detail=True,
+            permission_classes=[IsAuthenticated],
+            methods=['POST', 'DELETE'], )
+    def shopping_cart(self, request, pk=None):
+        return self._favorite_shopping_post_delete(
+            request.user.user_carts
+        )
 
-    @action(
-        detail=True,
-        methods=['post'],
-        permission_classes=(IsAuthenticated)
-    )
-    def shopping_cart(self, request, pk):
-        if self.request.method == 'POST':
-            return self.post_method(request=request,
-                                    pk=pk,
-                                    serializers=ShoppingCartSerializer)
-        if self.request.method == 'DELETE':
-            return self.delete_method(request=request,
-                                      pk=pk,
-                                      model=ShoppingCart)
+    # @staticmethod
+    # def post_method(request, pk, serializers):
+    #     data = {'user': request.user.id, 'recipe': pk}
+    #     serializer = serializers(data=data, context={'request': request})
+    #     serializer.is_valid(raise_exception=True)
+    #     serializers.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # @staticmethod
+    # def delete_method(request, pk, model):
+    #     user = request.user
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     model_obj = get_object_or_404(model, user=user, recipe=recipe)
+    #     model_obj.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # @action(
+    #     detail=True,
+    #     methods=['post', 'delete'],
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def favorite(self, request, pk):
+    #     if self.request.method == 'POST':
+    #         return self.post_method(request=request,
+    #                                 pk=pk,
+    #                                 serializers=FavoriteSerializer)
+    #     if self.request.method == 'DELETE':
+    #         return self.delete_method(request=request,
+    #                                   pk=pk,
+    #                                   model=Favorite)
+
+    # @action(
+    #     detail=True,
+    #     methods=['post'],
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def shopping_cart(self, request, pk):
+    #     if self.request.method == 'POST':
+    #         return self.post_method(request=request,
+    #                                 pk=pk,
+    #                                 serializers=ShoppingCartSerializer)
+    #     if self.request.method == 'DELETE':
+    #         return self.delete_method(request=request,
+    #                                   pk=pk,
+    #                                   model=ShoppingCart)
 
     @action(
         detail=False,

@@ -63,7 +63,7 @@ class User(AbstractUser):
     )
 
     def __str__(self):
-        return self.username
+        return self.user.username
 
     @property
     def is_admin(self):
