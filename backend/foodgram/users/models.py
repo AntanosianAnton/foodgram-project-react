@@ -3,11 +3,9 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 USER = 'user'
-GUEST = 'guest'
 ADMIN = 'admin'
 ROLES = (
     (USER, 'Пользователь'),
-    (GUEST, 'Гость'),
     (ADMIN, 'Администратор'),
 )
 
@@ -52,9 +50,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=16,
         choices=ROLES,
-        blank=True,
-        null=True,
-        default='user',
+        default=USER,
     )
     is_subscribed = models.BooleanField(
         default=False,
@@ -62,17 +58,12 @@ class User(AbstractUser):
         help_text='Подписаться',
     )
 
-    def __str__(self):
-        return self.user.username
+    class Meta:
+        ordering = ('role', )
 
     @property
     def is_admin(self):
-        return self.is_staff or self.role == ADMIN
+        return self.is_staff or self.is_superuser or self.role == self.ADMIN
 
-    @property
-    def is_guest(self):
-        return self.role == GUEST
-
-    @property
-    def is_user(self):
-        return self.role == USER
+    def __str__(self):
+        return self.username

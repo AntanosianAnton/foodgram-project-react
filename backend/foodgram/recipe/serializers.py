@@ -15,7 +15,7 @@ class TagSerializer(serializers.ModelSerializer):
     """ Сериалайзер  для тега """
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = ('id', 'name', 'color', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -45,7 +45,7 @@ class PurchaseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('id', 'name', 'image', 'cooking_time',)
 
 
 class RecipeReprpesentSerializer(serializers.ModelSerializer):
@@ -69,39 +69,39 @@ class RecipeReprpesentSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
-    """Сериалайзер для избранного"""
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        write_only=True,
-    )
-    recipe = serializers.PrimaryKeyRelatedField(
-        queryset=Recipe.objects.all(),
-        write_only=True,
-    )
+# class FavoriteSerializer(serializers.ModelSerializer):
+#     """Сериалайзер для избранного"""
+#     user = serializers.PrimaryKeyRelatedField(
+#         queryset=User.objects.all(),
+#         write_only=True,
+#     )
+#     recipe = serializers.PrimaryKeyRelatedField(
+#         queryset=Recipe.objects.all(),
+#         write_only=True,
+#     )
 
-    class Meta:
-        model = Favorite
-        fields = '__all__'
+#     class Meta:
+#         model = Favorite
+#         fields = '__all__'
 
-    def validate(self, data):
-        user = data['user']
-        recipe_id = data['recipe'].id
-        favorite_exists = Favorite.objects.filter(
-            user=user,
-            recipe_id=recipe_id
-            ).exists()
-        if favorite_exists:
-            raise ValidationError(
-                'Рецепт уже добавлен в избранное!'
-            )
-        return data
+#     def validate(self, data):
+#         user = data['user']
+#         recipe_id = data['recipe'].id
+#         favorite_exists = Favorite.objects.filter(
+#             user=user,
+#             recipe_id=recipe_id
+#             ).exists()
+#         if favorite_exists:
+#             raise ValidationError(
+#                 'Рецепт уже добавлен в избранное!'
+#             )
+#         return data
 
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return PurchaseListSerializer(instance.recipe,
-                                      context=context).data
+#     def to_representation(self, instance):
+#         request = self.context.get('request')
+#         context = {'request': request}
+#         return PurchaseListSerializer(instance.recipe,
+#                                       context=context).data
 
 
 class CheckRecipeSerializer(serializers.ModelSerializer):

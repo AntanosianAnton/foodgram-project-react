@@ -5,30 +5,29 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from foodgram.pagination import CustomPagination
-from rest_framework.permissions import (IsAuthenticated)
-                                        # IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from recipe.models import (Favorite, Ingredient, IngredientAmount, Recipe,
-                           ShoppingCart, Tag)
-from recipe.serializers import (CheckRecipeSerializer, FavoriteSerializer,
+                           Tag)
+from recipe.serializers import (CheckRecipeSerializer,
                                 IngredientSerializer, RecipeSerializer,
                                 TagSerializer, PurchaseListSerializer)
-from .permissions import IsAuthorOrAdmin, IsAdminOrReadOnly
+# from .permissions import IsAuthorOrAdmin
 from .filters import IngredientSearchFilter, RecipeFilter
 
 
-class TagViewSet(viewsets.ModelViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
-    # permission_classes = (IsAuthenticatedOrReadOnly,)
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    # permission_classes = (IsAdminOrReadOnly,)
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
-    # permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     serializer_class = IngredientSerializer
     filter_backends = (IngredientSearchFilter,)
@@ -37,8 +36,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrAdmin,)
-    # permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthorOrAdmin,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     default_serializer_class = RecipeSerializer
     filter_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
@@ -49,7 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return CheckRecipeSerializer
         return RecipeSerializer
 
-    def _favorite_shopping_post_delete(self, related_manager):
+    def favorite_shopping_post_delete(self, related_manager):
         recipe = self.get_object()
         if self.request.method == 'DELETE':
             related_manager.get(recipe_id=recipe.id).delete()
@@ -60,21 +59,61 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = PurchaseListSerializer(instance=recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True,
-            permission_classes=[IsAuthenticated],
-            methods=['POST', 'DELETE'], )
-    def favorite(self, request, pk=None):
-        return self._favorite_shopping_post_delete(
-            request.user.favorites_user
-        )
+    # @action(detail=True,
+    #         permission_classes=[IsAuthenticated],
+    #         methods=['POST', 'DELETE'], )
+    # def favorite(self, request, pk=None):
+    #     return self._favorite_shopping_post_delete(
+    #         request.user.favorites_user
+        # )
 
     @action(detail=True,
-            permission_classes=[IsAuthenticated],
+            permission_classes=(IsAuthenticated,),
             methods=['POST', 'DELETE'], )
     def shopping_cart(self, request, pk=None):
-        return self._favorite_shopping_post_delete(
+        return self.favorite_shopping_post_delete(
             request.user.user_carts
         )
+    # def shopping_cart(self, request, pk):
+    #     user = request.user
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     if request.method == 'POST':
+    #         ShoppingCart.objects.get_or_create(
+    #             user=user,
+    #             recipe=recipe,
+    #         )
+    #         serializer = PurchaseListSerializer(recipe)
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     to_buy = get_object_or_404(
+    #         ShoppingCart,
+    #         user=user,
+    #         recipe=recipe
+    #     )
+    #     to_buy.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=(IsAuthenticated,)
+    )
+    def favorite(self, request, pk):
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=pk)
+        if request.method == 'POST':
+            Favorite.objects.get_or_create(
+                user=user,
+                recipe=recipe,
+            )
+            serializer = PurchaseListSerializer(recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        favorite = get_object_or_404(
+            Favorite,
+            user=user,
+            recipe=recipe
+        )
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     # @staticmethod
     # def post_method(request, pk, serializers):
@@ -127,20 +166,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['get'],
         permission_classes=(IsAuthenticated,)
     )
-    def download_purchase_list(self, request):
+    def download_shopping_cart(self, request):
         purchase_list = {}
         ingredients = IngredientAmount.objects.filter(
-            recipe__purch__user=request.user).values_list(
-                'ingredient__name', 'ingredient__measurement_unit',
-                'quantity', 'recipe__name'
+            recipe__recipe_carts__user=request.user
         )
         for ingredient in ingredients:
             name = ingredient.ingredient.name
             amount = ingredient.amount
-            measurment_unit = ingredient.ingredient.measurment_unit
+            measurement_unit = ingredient.ingredient.measurement_unit
             if name not in purchase_list:
                 purchase_list[name] = {
-                    'measurment_unit': measurment_unit,
+                    'measurement_unit': measurement_unit,
                     'amount': amount
                 }
             else:
@@ -149,7 +186,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                       f"{value['measurement_unit']}\n"
                       for item, value in purchase_list.items()])
         today = datetime.date.today()
-        main_list.append(f'\n From FoodGram with love, {today.year}')
+        main_list.append(f'\n Enjoy your meal with Foodgram, {today.year}')
         response = HttpResponse(main_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename="BuyList.txt"'
         return response

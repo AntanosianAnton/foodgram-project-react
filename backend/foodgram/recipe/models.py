@@ -35,12 +35,12 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     name = models.CharField(
         verbose_name='Тэг',
-        max_length=255,
+        max_length=200,
     )
     color = ColorField(
         format='hex',
         verbose_name='Цвет',
-        help_text='Введите цвет тега'
+        help_text='Выберите цвет тега'
     )
     slug = models.SlugField(
         verbose_name='Адрес',
@@ -117,8 +117,11 @@ class ShoppingCart(models.Model):
         verbose_name = 'Корзина'
         constraints = [
             models.UniqueConstraint(fields=('user', 'recipe'),
-                                    name='shopping cart')
+                                    name='shopping_cart')
         ]
+        ordering = ('-id',)
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
 
     def __str__(self):
         return f'{self.recipe.name}, {self.user.username}'
@@ -141,6 +144,7 @@ class Subscribe(models.Model):
     )
 
     class Meta:
+        ordering = ('-id',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
@@ -200,7 +204,7 @@ class Favorite(models.Model):
         verbose_name_plural = 'Избранные'
         constraints = [
             models.UniqueConstraint(fields=('user', 'recipe'),
-                                    name='unique favorite')
+                                    name='unique_favorite')
         ]
 
     def __str__(self):
