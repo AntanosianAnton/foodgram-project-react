@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-# from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -35,26 +34,6 @@ class UsersViewSet(UserViewSet):
     )
     def subscribe(self, request, id):
         """Подписка на автора."""
-        # user = get_object_or_404(User, username=request.user.username)
-        # author = get_object_or_404(User, id=id)
-        # subscription = Subscribe.objects.filter(user=user, following=author)
-        # if self.request.method == 'POST':
-        #     if user.id == author.id:
-        #         return Response('Вы не можете подписаться на себя',
-        #                         status=status.HTTP_400_BAD_REQUEST)
-        #     elif subscription.exists():
-        #         return Response(f'Вы уже подписаны на {author}')
-        #     else:
-        #         Subscribe.objects.get_or_create(user=user, following=author)
-        #         serializer = FollowSerializer(
-        #             author,
-        #             context={'request': request},
-        #         )
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # if request.method == 'DELETE' and subscription.exists():
-        #     subscription.delete()
-        #     return Response(f'Вы успешно отписаны от {author}',
-        #                     status=status.HTTP_204_NO_CONTENT)
         user = request.user
         follow_to = get_object_or_404(User, id=id)
         subscription = Subscribe.objects.filter(user=user, following=follow_to)

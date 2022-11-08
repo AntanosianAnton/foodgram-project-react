@@ -64,11 +64,6 @@ class FollowSerializer(serializers.ModelSerializer):
                   'is_subscribed', 'recipes',
                   'recipes_count',)
 
-    # def get_is_subscribed(self, obj):
-    #     user = self.context.get('request').user
-    #     if user.is_anonymous:
-    #         return False
-    #     return Subscribe.objects.filter(user=user, following=obj.id).exists()
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
         return (
