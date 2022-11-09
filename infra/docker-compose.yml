@@ -9,8 +9,8 @@ services:
       - ./.env
 
   backend:
-    # image: antonant/foodgram_back
-    build: ../backend/foodgram/.
+    image: antonant/foodgram_back:latest
+    # build: ../backend/foodgram/.
     restart: always
     volumes:
       - static_value:/app/static/
@@ -21,7 +21,7 @@ services:
       - ./.env
 
   frontend:
-    image: antonant/foodgram_front
+    image: antonant/foodgram_front:latest
     volumes:
       - ../frontend/:/app/result_build/
 
