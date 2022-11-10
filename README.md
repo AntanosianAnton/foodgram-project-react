@@ -139,6 +139,17 @@ docker-compose exec backend python manage.py createsuperuser
 7. Скачать список покупок
 ### Статус workflow:
 ![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+### Foodgram: 
+
+[Foodgram](http://51.250.93.154/)
+### Админка:
+
+[Админка](http://51.250.93.154/admin/)
+Использовать данные для входа:
+```
+login: admin
+password: admin
+```
 ### Разработчик:
 
 [Антон Антаносян:](https://github.com/AntanosianAnton) 
