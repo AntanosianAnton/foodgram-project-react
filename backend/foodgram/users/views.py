@@ -1,11 +1,10 @@
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
+from recipe.models import Subscribe
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from recipe.models import Subscribe
 
 from .models import User
 from .serializers import FollowSerializer

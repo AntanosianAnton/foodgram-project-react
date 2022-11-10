@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from recipe.models import (Favorite, Ingredient, IngredientAmount, Recipe,
                            ShoppingCart, Subscribe, Tag)
 
