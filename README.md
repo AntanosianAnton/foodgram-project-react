@@ -138,7 +138,7 @@ docker-compose exec backend python manage.py createsuperuser
 6. Подписываться и отписываться на авторов;
 7. Скачать список покупок
 ### Статус workflow:
-![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+![example workflow](https://github.com/AntanosianAnton/foodgram-project-react/blob/master/.github/workflows/main.yml/badge.svg)
 ### Foodgram: 
 
 [Foodgram](http://51.250.93.154/)
