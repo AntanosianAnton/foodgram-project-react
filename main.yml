@@ -56,7 +56,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker compose down -v
+            sudo docker compose stop
             sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram_back
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_back:v1
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
