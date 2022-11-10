@@ -9,7 +9,7 @@ services:
       - ./.env
 
   backend:
-    image: antonant/foodgram_back:latest
+    image: antonant/foodgram_back:v1
     # build: ../backend/foodgram/.
     restart: always
     volumes:
