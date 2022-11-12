@@ -88,8 +88,7 @@ class CheckRecipeSerializer(serializers.ModelSerializer):
             'is_favorite', 'is_in_shopping_cart',
             'name', 'image', 'text', 'cooking_time')
 
-    @staticmethod
-    def get_ingredients(obj):
+    def get_ingredients(self, obj):
         ingredients = IngredientAmount.objects.filter(recipe=obj)
         return RecipeReprpesentSerializer(ingredients, many=True).data
 
@@ -125,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'name', 'image', 'text',
                   'ingredients', 'tags', 'cooking_time',)
 
-    def validate_ingredients(self, ingredients):
+    def validate_(self, data):
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise ValidationError(
@@ -134,31 +133,30 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             if int(ingredient['amount']) < INGREDIENT_MIN_VALUE:
                 raise ValidationError(
-                    'Количество ингредиентов должно быть больше нуля!'
+                    'Количество ингредиентов должно быть больше 0!'
                 )
         ids = [item['id'] for item in ingredients]
         if len(ids) != len(set(ids)):
             raise ValidationError(
                 'Ингредиенты в рецепте должны быть уникальными!'
             )
-        return ingredients
+        return data
 
-    def validate_сooking_time(self, value):
-        value = self.initial_data.get('cooking_time')
-        if value < MIN_TIME_VALUE:
+    def validate_cooking_time(self, value):
+        cooking_time = self.initial_data.get('cooking_time')
+        if int(cooking_time) < MIN_TIME_VALUE:
             raise ValidationError('Время приготовления не может быть равно 0')
         return value
 
-    @staticmethod
-    def create_tags_ingredients(tags, ingredients, recipe):
-        for tag in tags:
-            recipe.tags.add(tag)
-        for ingredient in ingredients:
-            IngredientAmount.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+    # def create_ingredients(tags, ingredients, recipe):
+    #     for tag in tags:
+    #         recipe.tags.add(tag)
+    #     for ingredient in ingredients:
+    #         IngredientAmount.objects.create(
+    #             recipe=recipe,
+    #             ingredient=ingredient['ingredient'],
+    #             amount=ingredient.get('amount'),
+    #         )
 
     def create(self, validated_data):
         author = self.context.get('request').user
@@ -167,7 +165,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         recipe = Recipe.objects.create(image=image, author=author,
                                        **validated_data)
-        self.create_tags_ingredients(tags_data, ingredients_data, recipe)
+        # self.create_ingredients(tags_data, ingredients_data, recipe)
+        # return recipe
+        recipe.save()
+        recipe.tags.set(tags_data)
+        IngredientAmount.objects.bulk_create([IngredientAmount(
+            ingredient=ingredient.get('id'),
+            recipe=recipe,
+            amount=ingredient['amount']
+        ) for ingredient in ingredients_data])
         return recipe
 
     def update(self, recipe, validated_data):
