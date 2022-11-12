@@ -7,7 +7,6 @@ from users.models import User
 from users.serializers import UserSignupSerializer
 
 INGREDIENT_MIN_VALUE = 1
-MIN_TIME_VALUE = 1
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -125,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'name', 'image', 'text',
                   'ingredients', 'tags', 'cooking_time',)
 
-    def validate_ingredients(self, ingredients):
+    def validate(self, ingredients):
         if not ingredients:
             raise ValidationError(
                 'Необходимо выбрать ингредиенты!'
@@ -142,11 +141,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return ingredients
 
-    @staticmethod
-    def validate_time(value):
-        if value <= MIN_TIME_VALUE:
-            raise ValidationError('Время приготовления не может быть равно 0')
-        return value
+    # @staticmethod
+    # def validate_time(value):
+    #     if value <= MIN_TIME_VALUE:
+    #         raise ValidationError('
+    # Время приготовления не может быть равно 0')
+    #     return value
 
     @staticmethod
     def create_tags_ingredients(tags, ingredients, recipe):

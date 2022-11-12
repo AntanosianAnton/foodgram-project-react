@@ -4,6 +4,7 @@ from django.db import models
 from users.models import User
 
 INGREDIENT_MIN_VALUE = 1
+MIN_TIME_VALUE = 1
 
 
 class Ingredient(models.Model):
@@ -52,7 +53,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
 
 
 class Recipe(models.Model):
@@ -86,7 +87,13 @@ class Recipe(models.Model):
         Tag,
         related_name='recipe'
     )
-    cooking_time = models.PositiveIntegerField('Время проготовления')
+    cooking_time = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(
+            MIN_TIME_VALUE,
+            'Время приготовления не может быть равно 0')],
+        verbose_name='Время приготовления в минутах',
+    )
     description = models.TextField(null=True)
 
     class Meta:
