@@ -144,9 +144,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         return ingredients
 
     @staticmethod
-    def validate_time(self, value):
+    def validate_сooking_time(self, value):
         value = self.initial_data.get('cooking_time')
-        if value <= MIN_TIME_VALUE:
+        if value < MIN_TIME_VALUE:
             raise ValidationError('Время приготовления не может быть равно 0')
         return value
 
