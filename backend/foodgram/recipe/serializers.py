@@ -132,7 +132,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Необходимо выбрать ингредиенты!'
             )
         for ingredient in ingredients:
-            if int(ingredient['amount']) < MIN_TIME_VALUE:
+            if int(ingredient['amount']) < INGREDIENT_MIN_VALUE:
                 raise ValidationError(
                     'Количество ингредиентов должно быть больше нуля!'
                 )
@@ -143,7 +143,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return ingredients
 
-    @staticmethod
     def validate_сooking_time(self, value):
         value = self.initial_data.get('cooking_time')
         if value < MIN_TIME_VALUE:
