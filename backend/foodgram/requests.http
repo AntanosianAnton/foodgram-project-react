@@ -34,18 +34,18 @@ Authorization: Token 3719d2f612b6d6e3b9d7c714b55f20e244be3f47
   "current_password": "Zz12345678"
 }
 ###
-POST http://127.0.0.1:80/api/auth/token/login/
+POST http://127.0.0.1:8000/api/auth/token/login/
 Content-Type: application/json
 
-{
-  "password": "passwordD",
-  "email": "anton@post.api"
-}
-
 # {
-#   "password": "Zz12345678",
-#   "email": "test@user16.com"
+#   "password": "passwordD",
+#   "email": "anton@post.api"
 # }
+
+{
+  "password": "Zz12345678",
+  "email": "test@user16.com"
+}
 ###
 POST http://127.0.0.1:8000/api/auth/token/logout/
 Content-Type: application/json
@@ -70,10 +70,10 @@ Content-Type: application/json
 # Authorization: Token e05436871fd55c833a2678733861f29c11003bf0
 
 ###
-POST http://127.0.0.1:80/api/recipes/
+POST http://127.0.0.1:8000/api/recipes/
 Content-Type: application/json
+# Authorization: Token 32e08ebbfba7ed90a72b23212ac3ff65a39fc33a
 Authorization: Token 8314eed242f06ef653e6c43ae8378642d06f37d1
-# Authorization: Token e05436871fd55c833a2678733861f29c11003bf0
 
 {
   "ingredients": [

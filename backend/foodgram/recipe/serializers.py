@@ -7,6 +7,7 @@ from users.models import User
 from users.serializers import UserSignupSerializer
 
 INGREDIENT_MIN_VALUE = 1
+MIN_TIME_VALUE = 1
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -124,13 +125,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'name', 'image', 'text',
                   'ingredients', 'tags', 'cooking_time',)
 
-    def validate(self, ingredients):
+    def validate_ingredients(self, ingredients):
+        ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise ValidationError(
                 'Необходимо выбрать ингредиенты!'
             )
         for ingredient in ingredients:
-            if int(ingredient['amount']) < INGREDIENT_MIN_VALUE:
+            if int(ingredient['amount']) < MIN_TIME_VALUE:
                 raise ValidationError(
                     'Количество ингредиентов должно быть больше нуля!'
                 )
@@ -141,12 +143,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         return ingredients
 
-    # @staticmethod
-    # def validate_time(value):
-    #     if value <= MIN_TIME_VALUE:
-    #         raise ValidationError('
-    # Время приготовления не может быть равно 0')
-    #     return value
+    @staticmethod
+    def validate_time(self, value):
+        value = self.initial_data.get('cooking_time')
+        if value <= MIN_TIME_VALUE:
+            raise ValidationError('Время приготовления не может быть равно 0')
+        return value
 
     @staticmethod
     def create_tags_ingredients(tags, ingredients, recipe):
@@ -154,8 +156,9 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe.tags.add(tag)
         for ingredient in ingredients:
             IngredientAmount.objects.create(
-                recipe=recipe, ingredient=ingredient['id'],
-                amount=ingredient['amount']
+                recipe=recipe,
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
             )
 
     def create(self, validated_data):
