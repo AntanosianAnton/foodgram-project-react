@@ -124,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'name', 'image', 'text',
                   'ingredients', 'tags', 'cooking_time',)
 
-    def validate_(self, data):
+    def validate_ingredients(self, data):
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise ValidationError(
